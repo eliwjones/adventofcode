@@ -2,6 +2,24 @@ import unittest
 
 
 def get_max_elf(str_data):
+    elves = get_elf_calories(str_data)
+    max_index = elves.index(max(elves))
+
+    return max_index, elves[max_index]
+
+
+def get_top_elves(str_data, count):
+    elves = get_elf_calories(str_data)
+
+    result = []
+    while len(result) != count and elves:
+        i = elves.index(max(elves))
+        result.append(elves.pop(i))
+
+    return result
+
+
+def get_elf_calories(str_data):
     parsed_data = str_data.split('\n')
 
     elves = [0]
@@ -18,9 +36,7 @@ def get_max_elf(str_data):
         val = int(val)
         elves[index] += val
 
-    max_index = elves.index(max(elves))
-
-    return max_index, elves[max_index]
+    return elves
 
 
 class Test(unittest.TestCase):
