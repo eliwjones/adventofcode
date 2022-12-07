@@ -2,18 +2,28 @@ import unittest
 
 
 def calculate_score(str_data):
-    moves = {'A': 'Rock', 'X': 'Rock', 'B': 'Paper', 'Y': 'Paper', 'C': 'Scissors', 'Z': 'Scissors'}
+    moves = {'A': 'Rock', 'B': 'Paper', 'C': 'Scissors'}
     move_scores = {'Rock': 1, 'Paper': 2, 'Scissors': 3}
+    encoded_outcomes = {'X': 'lose', 'Y': 'draw', 'Z': 'win'}
     outcome_scores = {'win': 6, 'lose': 0, 'draw': 3}
+    win_map = {'Paper': 'Scissors', 'Rock': 'Paper', 'Scissors': 'Rock'}
+    lose_map = {v: k for k, v in win_map.items()}
+
     outcomes = {('Paper', 'Rock'): 'Paper', ('Paper', 'Scissors'): 'Scissors', ('Rock', 'Scissors'): 'Rock'}
 
     parsed_data = str_data.split('\n')
-    suggested_moves = [line.split(' ') for line in parsed_data]
-    suggested_moves = [(moves[opp], moves[you]) for opp, you in suggested_moves]
+    suggested = [line.split(' ') for line in parsed_data]
+    suggested = [(moves[opp], encoded_outcomes[you]) for opp, you in suggested]
 
     your_score = 0
     opponent_score = 0
-    for opponent, you in suggested_moves:
+    for opponent, outcome in suggested:
+        you = opponent
+        if outcome == 'win':
+            you = win_map[opponent]
+        elif outcome == 'lose':
+            you = lose_map[opponent]
+
         sorted_key = tuple(sorted((opponent, you)))
 
         winner = you
@@ -41,7 +51,7 @@ class Test(unittest.TestCase):
 
         you, opponent = calculate_score(str_data)
 
-        self.assertEqual(you, 15, f"Expected your score to be 15 but got {you}.")
+        self.assertEqual(you, 12, f"Expected your score to be 12 but got {you}.")
 
 
 if __name__ == '__main__':
