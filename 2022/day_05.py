@@ -12,7 +12,7 @@ def top_crates(str_data):
     move_data = split_data[empty_index + 1 :]
     moves = parse_moves(move_data)
     for count, start, dest in moves:
-        clump = list(reversed(crates[str(start)][-1 * count :]))
+        clump = crates[str(start)][-1 * count :]
         crates[str(start)] = crates[str(start)][: -1 * count]
         crates[str(dest)].extend(clump)
 
@@ -61,7 +61,7 @@ move 2 from 2 to 1
 move 1 from 1 to 2"""
 
         tops = top_crates(str_data)
-        expected = 'CMZ'
+        expected = 'MCD'
 
         self.assertEqual(tops, expected, f"Expected top_crates to be {expected} but got {tops}.")
 
