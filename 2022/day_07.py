@@ -4,6 +4,8 @@ import unittest
 LS = '$ ls'
 CD = '$ cd '
 DIR = 'dir '
+TOTAL_SIZE = 70_000_000
+MIN_SPACE = 30_000_000
 
 
 def dir_sizes(str_buffer):
@@ -42,6 +44,19 @@ def threshold_sum(dir_sizes, threshold):
     return sum(filtered_dirs.values())
 
 
+def min_dir_to_delete(dir_sizes, total_size, min_space):
+    free_space = total_size - dir_sizes['/']
+    space_needed = min_space - free_space
+
+    if space_needed <= 0:
+        return 0, ''
+
+    filtered_dirs = {size: dir for dir, size in dir_sizes.items() if size >= space_needed}
+    min_size = min(filtered_dirs.keys())
+
+    return min_size, filtered_dirs[min_size]
+
+
 class Test(unittest.TestCase):
     def test_start_marker(self):
         data = [
@@ -76,6 +91,11 @@ class Test(unittest.TestCase):
         expected = 95437
 
         self.assertEqual(size, expected, f"Expected size to be {expected} but got {size}.")
+
+        size, dirname = min_dir_to_delete(directories, TOTAL_SIZE, MIN_SPACE)
+        expected = 24933642
+
+        self.assertEqual(size, expected, f"Expected min_dir size to be {expected} but got {size} for dir '{dirname}'.")
 
 
 if __name__ == '__main__':
