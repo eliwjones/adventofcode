@@ -4,17 +4,17 @@ import unittest
 sign = lambda a: (a > 0) - (a < 0)
 
 
-def tail_moves(str_data):
+def tail_moves(str_data, num_knots):
     moves = unpack_moves(moves=str_data.split('\n'))
 
-    head = (0, 0)
-    tail = (0, 0)
+    knots = [(0, 0) for _ in range(num_knots)]
     tail_positions = {(0, 0)}
     for move in moves:
-        head = move_head(move, head)
-        tail = move_tail(tail, head)
+        knots[0] = move_head(move, knots[0])
+        for i in range(1, num_knots):
+            knots[i] = move_tail(knots[i], knots[i - 1])
 
-        tail_positions.add(tail)
+        tail_positions.add(knots[-1])
 
     return tail_positions
 
@@ -71,8 +71,16 @@ class Test(unittest.TestCase):
         data = ['R 4', 'U 4', 'L 3', 'D 1', 'R 4', 'D 1', 'L 5', 'R 2']
         str_data = '\n'.join(data)
 
-        moves = tail_moves(str_data)
+        moves = tail_moves(str_data, num_knots=2)
         expected = 13
+
+        self.assertEqual(len(moves), expected, f"Expected tail to have visited {expected} spots but got {len(moves)}.")
+
+        data = ['R 5', 'U 8', 'L 8', 'D 3', 'R 17', 'D 10', 'L 25', 'U 20']
+        str_data = '\n'.join(data)
+
+        moves = tail_moves(str_data, num_knots=10)
+        expected = 36
 
         self.assertEqual(len(moves), expected, f"Expected tail to have visited {expected} spots but got {len(moves)}.")
 
