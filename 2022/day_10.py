@@ -1,18 +1,22 @@
 import unittest
 
 
-def signal_sum(str_data, poll_points=list(range(19, 220, 40))):
+def signal(str_data, poll_points):
     parsed_data = str_data.split('\n')
 
-    register = [1]
+    sig = [1]
     for cmd in parsed_data:
         cycles, inc = parse_command(cmd)
-        extension = [register[-1] for _ in range(cycles)]
+        extension = [sig[-1] for _ in range(cycles)]
         extension[-1] += inc
 
-        register.extend(extension)
+        sig.extend(extension)
 
-    return sum(register[i] * (i + 1) for i in poll_points)
+    return sig
+
+
+def signal_sum(sig, poll_points):
+    return sum(sig[i] * (i + 1) for i in poll_points)
 
 
 def parse_command(cmd):
@@ -23,6 +27,27 @@ def parse_command(cmd):
     inc = int(inc)
 
     return 2, inc
+
+
+def crt(sig):
+    screen = [['.' for _ in range(40)] for _ in range(6)]
+
+    for i in range(len(screen)):
+        for j in range(len(screen[i])):
+            idx = i * 40 + j
+            pixel = [sig[idx] - 1, sig[idx], sig[idx] + 1]
+            if j in pixel:
+                screen[i][j] = '#'
+
+    return screen
+
+
+def display(screen):
+    output = '\n'
+    for row in screen:
+        output += f"{''.join(row)}\n"
+
+    return output
 
 
 class Test(unittest.TestCase):
@@ -178,10 +203,14 @@ class Test(unittest.TestCase):
 
         str_data = '\n'.join(map(str, data))
 
-        signal = signal_sum(str_data)
+        sig = signal(str_data, poll_points=list(range(19, 220, 40)))
+        sig_sum = signal_sum(sig, poll_points=list(range(19, 220, 40)))
         expected = 13140
 
-        self.assertEqual(signal, expected, f"Expected signal sum to be {expected} but got {signal}.")
+        self.assertEqual(sig_sum, expected, f"Expected signal sum to be {expected} but got {sig_sum}.")
+
+        screen = crt(sig)
+        print(display(screen))
 
 
 if __name__ == '__main__':
