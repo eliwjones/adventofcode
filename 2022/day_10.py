@@ -1,7 +1,7 @@
 import unittest
 
 
-def signal(str_data, poll_points):
+def signal(str_data):
     parsed_data = str_data.split('\n')
 
     sig = [1]
@@ -203,7 +203,7 @@ class Test(unittest.TestCase):
 
         str_data = '\n'.join(map(str, data))
 
-        sig = signal(str_data, poll_points=list(range(19, 220, 40)))
+        sig = signal(str_data)
         sig_sum = signal_sum(sig, poll_points=list(range(19, 220, 40)))
         expected = 13140
 
