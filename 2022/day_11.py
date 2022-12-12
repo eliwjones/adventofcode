@@ -17,6 +17,7 @@ def parse_monkey_data(str_data):
     ops = {'*': mul, '+': add}
 
     monkeys = {}
+    modulus_product = 1
     for line in lines:
         data = line.split('\n')
         data = [datum.strip() for datum in data]
@@ -38,10 +39,12 @@ def parse_monkey_data(str_data):
             'dest': dest,
         }
 
-    return monkeys
+        modulus_product *= test_modulus
+
+    return monkeys, modulus_product
 
 
-def monkey_play_score(monkeys, rounds):
+def monkey_play_score(monkeys, modulus_product, rounds, worry_divisor):
     counter = {key: 0 for key in monkeys.keys()}
     while rounds:
         for idx in range(len(monkeys.keys())):
@@ -49,7 +52,8 @@ def monkey_play_score(monkeys, rounds):
             while monkeys[key]['items']:
                 item = monkeys[key]['items'].pop(0)
 
-                new_item = monkeys[key]['op'](item) // 3
+                new_item = monkeys[key]['op'](item) // worry_divisor
+                new_item = new_item % modulus_product
 
                 test = monkeys[key]['test'](new_item)
                 dest_key = monkeys[key]['dest'][str(test)]
@@ -98,9 +102,15 @@ Monkey 3:
     If true: throw to monkey 0
     If false: throw to monkey 1"""
 
-        monkeys = parse_monkey_data(str_data)
-        score = monkey_play_score(monkeys, rounds=20)
+        monkeys, modulus_product = parse_monkey_data(str_data)
+        score = monkey_play_score(monkeys, modulus_product, rounds=20, worry_divisor=3)
         expected = 10605
+
+        self.assertEqual(score, expected, f"Expected sum of {expected} but got {score}.")
+
+        monkeys, modulus_product = parse_monkey_data(str_data)
+        score = monkey_play_score(monkeys, modulus_product, rounds=10000, worry_divisor=1)
+        expected = 2713310158
 
         self.assertEqual(score, expected, f"Expected sum of {expected} but got {score}.")
 
