@@ -95,6 +95,40 @@ def trim_moves(valid_moves, pos, end):
     return [w[1] for w in weights if w[0] == min_weight]
 
 
+def best_start(starts, moves, end):
+    winners = []
+    for start in starts:
+        winners.extend(find_paths(moves, start, end))
+
+    return min_path(winners)
+
+
+def valid_starts(maze, moves):
+    ijs = [(i, j) for i in range(len(maze)) for j in range(len(maze[i]))]
+    a_positions = [(i, j) for i, j in ijs if maze[i][j] == 'a']
+
+    starts = []
+    for i, j in a_positions:
+        valid_moves = moves[i][j]
+        valid_moves = [m for m in valid_moves if maze[m[0]][m[1]] != 'a']
+
+        if not valid_moves:
+            continue
+
+        starts.append((i, j))
+
+    return starts
+
+
+def min_path(paths):
+    result = paths[0]
+    for path in paths[1:]:
+        if len(path) < len(result):
+            result = path
+
+    return result
+
+
 class Test(unittest.TestCase):
     def test_find_paths(self):
         data = ['Sabqponm', 'abcryxxl', 'accszExk', 'acctuvwj', 'abdefghi']
@@ -103,8 +137,16 @@ class Test(unittest.TestCase):
         moves, start, end, maze = process_maze(maze)
         winners = find_paths(moves, start, end)
 
-        min_len = min([len(winner) for winner in winners]) - 1
+        min_len = len(min_path(winners)) - 1
         expected = 31
+
+        self.assertEqual(min_len, expected, f"Expected min length to be {expected} but got {min_len}.")
+
+        starts = valid_starts(maze, moves)
+        path = best_start(starts, moves, end)
+
+        min_len = len(path) - 1
+        expected = 29
 
         self.assertEqual(min_len, expected, f"Expected min length to be {expected} but got {min_len}.")
 
