@@ -30,7 +30,6 @@ def simulate(cave, sand_source):
 
             if not moved:
                 cave[pos[1]][pos[0]] = SAND
-                print_cave(cave)
 
                 break
 
@@ -53,7 +52,6 @@ def build_cave(paths):
         if one[1] != two[1]:
             x = one[0]
             for y in range(one[1], two[1] + 1):
-                print(f"x: {x}, y: {y}, len(cave[0]): {len(cave[0])}, len(cave): {len(cave)}")
                 cave[y][x] = ROCK
 
     return cave
@@ -101,16 +99,15 @@ def sort_points(one, two):
 class Test(unittest.TestCase):
     def test_simulate(self):
         data = ['498,4 -> 498,6 -> 496,6', '503,4 -> 502,4 -> 502,9 -> 494,9']
-        str_data = '\n'.join(map(str, data))
-
-        print()
+        str_data = '\n'.join(data)
 
         paths = parse_path_data(str_data)
         cave = build_cave(paths)
 
         print_cave(cave)
-
         cave = simulate(cave=cave, sand_source=(500, 0))
+        print_cave(cave)
+
         sand_count = count_things(cave=cave, thing=SAND)
         expected = 24
 
