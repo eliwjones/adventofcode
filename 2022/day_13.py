@@ -1,6 +1,7 @@
 import json
 import unittest
 
+from functools import cmp_to_key
 
 def ordered_group_indices(data):
     ordered_groups = []
@@ -86,6 +87,37 @@ class Test(unittest.TestCase):
         expected = 13
 
         self.assertEqual(s, expected, f"Expected the sum of ordered group indices to be {expected} but got {s}.")
+
+        data = parse_str_data(str_data)
+        data.extend([[[2]], [[6]]])
+
+        data = sorted(data, key=cmp_to_key(compare))
+
+        expected = [
+            '[]',
+            '[[]]',
+            '[[[]]]',
+            '[1,1,3,1,1]',
+            '[1,1,5,1,1]',
+            '[[1],[2,3,4]]',
+            '[1,[2,[3,[4,[5,6,0]]]],8,9]',
+            '[1,[2,[3,[4,[5,6,7]]]],8,9]',
+            '[[1],4]',
+            '[[2]]',
+            '[3]',
+            '[[4,4],4,4]',
+            '[[4,4],4,4,4]',
+            '[[6]]',
+            '[7,7,7]',
+            '[7,7,7,7]',
+            '[[8,7,6]]',
+            '[9]',
+        ]
+
+        expected_str = '\n'.join(expected)
+        expected = parse_str_data(expected_str)
+
+        self.assertEqual(data, expected, f"Expected to match reference sort, but got: {json.dumps(data, indent=4)}")
 
 
 if __name__ == '__main__':
