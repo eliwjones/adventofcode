@@ -5,11 +5,12 @@ SAND = 'o'
 AIR = '.'
 
 
-def simulate(cave, sand_source):
+def simulate(cave, sand_source, infinite_floor=False):
     sand_moves = ((0, 1), (-1, 1), (1, 1))
 
     while True:
         pos = list(sand_source)
+        moved_from_source = False
 
         while True:
             moved = False
@@ -17,14 +18,23 @@ def simulate(cave, sand_source):
                 i = pos[1] + y
                 j = pos[0] + x
 
-                if not (0 <= i < len(cave)) or not (0 <= j < len(cave[i])):
+                if not (0 <= i < len(cave)):
                     return cave
+
+                if not (0 <= j < len(cave[i])):
+                    if infinite_floor and i == len(cave) - 1:
+                        cave[i].append(ROCK)
+                    elif infinite_floor:
+                        cave[i].append(AIR)
+                    else:
+                        return cave
 
                 if cave[i][j] != AIR:
                     continue
 
                 pos = [j, i]
                 moved = True
+                moved_from_source = True
 
                 break
 
@@ -32,6 +42,9 @@ def simulate(cave, sand_source):
                 cave[pos[1]][pos[0]] = SAND
 
                 break
+
+        if not moved_from_source:
+            break
 
     return cave
 
@@ -53,6 +66,15 @@ def build_cave(paths):
             x = one[0]
             for y in range(one[1], two[1] + 1):
                 cave[y][x] = ROCK
+
+    return cave
+
+
+def add_floor(cave):
+    air = [AIR for _ in range(len(cave[-1]))]
+    rocks = [ROCK for _ in range(len(cave[-1]))]
+
+    cave.extend([air, rocks])
 
     return cave
 
@@ -80,7 +102,7 @@ def parse_path_data(str_data):
 def print_cave(cave):
     print('\n')
     for row in cave:
-        print(''.join(row[-50:]))
+        print(''.join(row[369:]))
 
 
 def sort_points(one, two):
@@ -110,6 +132,18 @@ class Test(unittest.TestCase):
 
         sand_count = count_things(cave=cave, thing=SAND)
         expected = 24
+
+        self.assertEqual(sand_count, expected, f"Expected to see {expected} grains of sand but got {sand_count}.")
+
+        cave = build_cave(paths)
+        cave = add_floor(cave)
+
+        print_cave(cave)
+        cave = simulate(cave=cave, sand_source=(500, 0), infinite_floor=True)
+        print_cave(cave)
+
+        sand_count = count_things(cave=cave, thing=SAND)
+        expected = 93
 
         self.assertEqual(sand_count, expected, f"Expected to see {expected} grains of sand but got {sand_count}.")
 
