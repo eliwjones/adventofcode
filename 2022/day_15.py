@@ -3,32 +3,49 @@ import unittest
 from collections import defaultdict
 
 
-def draw_map(sensor_data):
-    m = defaultdict(dict)
+def build_sensors_and_beacons(sensor_data):
+    sensors = {}
+    beacons = {}
 
+    max_xy = [0, 0]
+    min_xy = [0, 0]
     for sensor, beacon in sensor_data:
-        min_dist = manhattan(sensor, beacon)
+        distance = manhattan(sensor, beacon)
 
-        clear_net = net(sensor, min_dist)
+        sensors[sensor] = {'y_range': [sensor[1] - distance, sensor[1] + distance], 'intersects': intersects(sensor, distance)}
 
-        for x, y in clear_net:
-            m[x][y] = '#'
+        beacons[beacon] = True
 
-        m[sensor[0]][sensor[1]] = 'S'
-        m[beacon[0]][beacon[1]] = 'B'
+        for i in range(2):
+            max_xy[i] = max(sensor[i] + distance, beacon[i], max_xy[i])
+            min_xy[i] = min(sensor[i] - distance, beacon[i], min_xy[i])
 
-    return m
+    return sensors, beacons, max_xy, min_xy
 
 
-def get_map_row(m, y):
-    row = []
-    for x in sorted(m.keys()):
-        if y not in m[x]:
-            continue
+def get_y_count(sensors, beacons, y, min_x, max_x):
+    viable_sensors = []
+    for sensor in sensors.values():
+        if sensor['y_range'][0] <= y <= sensor['y_range'][1]:
+            viable_sensors.append(sensor)
 
-        row.append(m[x][y])
+    count = 0
+    for x in range(min_x, max_x + 1):
+        for sensor in viable_sensors:
+            if sensor['intersects']((x, y)) and (x, y) not in beacons:
+                count += 1
+                break
 
-    return row
+    return count
+
+
+def intersects(center, radius):
+    def func(point):
+        distance = manhattan(center, point)
+
+        return distance <= radius
+
+    return func
 
 
 def manhattan(one, two):
@@ -82,9 +99,9 @@ class Test(unittest.TestCase):
         str_data = '\n'.join(data)
 
         sensor_data = parse_sensor_data(str_data)
-        m = draw_map(sensor_data)
+        sensors, beacons, max_xy, min_xy = build_sensors_and_beacons(sensor_data)
 
-        count = sum(1 for x in get_map_row(m, 10) if x == '#')
+        count = get_y_count(sensors, beacons, 10, min_xy[0], max_xy[0])
         expected = 26
 
         self.assertEqual(count, expected, f"Expected {expected} no gos but got {count}.")
