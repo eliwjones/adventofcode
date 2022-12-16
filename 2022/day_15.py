@@ -54,14 +54,6 @@ def manhattan(one, two):
     return d
 
 
-def net(center, dist):
-    points = [
-        (x, y) for x in range(-1 * dist, dist + 1) for y in range(-1 * dist, dist + 1) if 0 < manhattan((x, y), (0, 0)) <= dist
-    ]
-
-    return [(center[0] + x, center[1] + y) for x, y in points]
-
-
 def parse_sensor_data(str_data):
     data = str_data.replace('Sensor at x=', '').replace(' closest beacon is at x=', '').replace(' y=', '')
 
