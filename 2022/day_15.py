@@ -14,10 +14,21 @@ def draw_map(sensor_data):
         for x, y in clear_net:
             m[x][y] = '#'
 
-        m[sensor[1]][sensor[0]] = 'S'
-        m[beacon[1]][beacon[0]] = 'B'
+        m[sensor[0]][sensor[1]] = 'S'
+        m[beacon[0]][beacon[1]] = 'B'
 
     return m
+
+
+def get_map_row(m, y):
+    row = []
+    for x in sorted(m.keys()):
+        if y not in m[x]:
+            continue
+
+        row.append(m[x][y])
+
+    return row
 
 
 def manhattan(one, two):
@@ -27,7 +38,9 @@ def manhattan(one, two):
 
 
 def net(center, dist):
-    points = [(x, y) for x in range(dist + 1) for y in range(dist + 1) if 0 < x + y <= dist]
+    points = [
+        (x, y) for x in range(-1 * dist, dist + 1) for y in range(-1 * dist, dist + 1) if 0 < manhattan((x, y), (0, 0)) <= dist
+    ]
 
     return [(center[0] + x, center[1] + y) for x, y in points]
 
@@ -48,7 +61,7 @@ def parse_sensor_data(str_data):
 
 
 class Test(unittest.TestCase):
-    def test_overlapping_ranges(self):
+    def test_day_15(self):
         data = [
             'Sensor at x=2, y=18: closest beacon is at x=-2, y=15',
             'Sensor at x=9, y=16: closest beacon is at x=10, y=16',
@@ -71,11 +84,7 @@ class Test(unittest.TestCase):
         sensor_data = parse_sensor_data(str_data)
         m = draw_map(sensor_data)
 
-        print(f"\ny: {9}, x's: {m[9].values()}")
-        print(f"\ny: {10}, x's: {m[10].values()}")
-        print(f"\ny: {11}, x's: {m[11].values()}")
-
-        count = sum(1 for x in m[10].keys() if m[10][x] == '#')
+        count = sum(1 for x in get_map_row(m, 10) if x == '#')
         expected = 26
 
         self.assertEqual(count, expected, f"Expected {expected} no gos but got {count}.")
